@@ -1,0 +1,77 @@
+.city-search-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 450px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.input-container {
+  width: 100%;
+  position: relative;
+}
+
+.city-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0; /* Remove space below input */
+  box-sizing: border-box; /* Ensure padding and border are included in width */
+}
+
+.city-suggestions {
+  width: 100%; /* Match the input width */
+  border: 1px solid #ccc;
+  border-top: none; /* Remove the top border to align with the input */
+  border-radius: 0 0 5px 5px; /* Rounded corners only at the bottom */
+  background-color: white;
+  max-height: 200px;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  margin: 0; /* Remove any margin */
+  position: absolute; /* Position absolutely relative to form */
+  top: 100%; /* Directly below the input field */
+  left: 0; /* Align with the input field */
+  z-index: 10; /* Ensure it appears above other elements */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box; /* Ensure padding and border are included in width */
+}
+
+.suggestion-item {
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background-color: #f0f0f0;
+}
+
+.search-button {
+  margin-top: 20px;
+  padding: 12px 70px;
+  border: none;
+  border-radius: 25px;
+  background: linear-gradient(to bottom, #b2dffc, #8ccde3);
+  color: #333;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.search-button:hover {
+  background: linear-gradient(to bottom, #8ccde3, #6bb3d1);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+}
+
+.search-button:active {
+  background: linear-gradient(to bottom, #6bb3d1, #4a9bbf);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}

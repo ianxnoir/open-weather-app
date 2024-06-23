@@ -1,24 +1,38 @@
 .App {
-  text-align: center;
-  font-family: Arial, sans-serif;
-}
-
-form {
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f0f4f8;
+  height: 100vh;
+  padding: 50px;
 }
 
-input, select {
-  padding: 10px;
-  margin: 10px 0;
+h1 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  color: #333;
 }
 
-button {
-  padding: 10px;
-  margin-top: 10px;
-}
-
-h2 {
+.previous-searches {
   margin-top: 20px;
+  text-align: center;
+}
+
+.previous-searches h2 {
+  font-size: 1.5em;
+}
+
+.previous-searches ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.previous-searches li {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin: 5px 0;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
