@@ -10,9 +10,10 @@ const CitySearch = ({ onSearch }) => {
   useEffect(() => {
     const debouncedFilterCities = debounce((value) => {
       if (value.length > 0) {
-        const filtered = cities.filter(city =>
-          city.name.toLowerCase().includes(value.toLowerCase())
-        ).slice(0, 10);
+        const filtered = cities.filter(city => {
+          const searchString = `${city.name.toLowerCase()} ${city.state ? city.state.toLowerCase() : ''} ${city.country.toLowerCase()}`;
+          return searchString.includes(value.toLowerCase());
+        }).slice(0, 10);
         setFilteredCities(filtered);
       } else {
         setFilteredCities([]);
@@ -32,14 +33,16 @@ const CitySearch = ({ onSearch }) => {
   };
 
   const handleCitySelect = (city) => {
-    setLocation(`${city.name}, ${city.country}`);
+    setLocation(`${city.name}, ${city.state ? city.state + ', ' : ''}${city.country}`);
     setFilteredCities([]);
-
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const city = cities.find(city => city.name.toLowerCase() === location.toLowerCase());
+    const city = cities.find(city => {
+      const searchString = `${city.name.toLowerCase()} ${city.state ? city.state.toLowerCase() : ''} ${city.country.toLowerCase()}`;
+      return searchString === location.toLowerCase();
+    });
     onSearch(city ? city : { name: location });
   };
 

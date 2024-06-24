@@ -36,7 +36,13 @@ const App = () => {
         throw new Error('API key is undefined');
       }
 
-      const query = city.name.split(',').map(part => part.trim()).join(',');
+      let query = city.name;
+      if (city.state) {
+        query += `,${city.state}`;
+      }
+      if (city.country) {
+        query += `,${city.country}`;
+      }
       const url = `https://api.openweathermap.org/data/2.5/weather?q=${query}&units=metric&appid=${apiKey}`;
       
       const response = await axios.get(url);
