@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { debounce } from 'lodash';
-import cities from '../data/city.list.json'; // Adjust the path based on your actual structure
+import cities from '../data/city.list.json';
 import './CitySearch.css';
 
 const CitySearch = ({ onSearch }) => {
@@ -8,12 +8,11 @@ const CitySearch = ({ onSearch }) => {
   const [selectedCityId, setSelectedCityId] = useState('');
   const [filteredCities, setFilteredCities] = useState([]);
 
-  // Debounce the filter function to improve performance
   const debouncedFilterCities = useCallback(debounce((value) => {
     if (value.length > 0) {
       const filtered = cities.filter(city =>
         city.name.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 10); // Limit the number of results to improve performance
+      ).slice(0, 10); 
       setFilteredCities(filtered);
     } else {
       setFilteredCities([]);

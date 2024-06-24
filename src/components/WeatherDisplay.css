@@ -52,6 +52,13 @@
   margin: 0;
 }
 
+.previous-temp {
+  font-size: 2em;
+  font-weight: bold;
+  margin: 0;
+}
+
+
 .feels-like {
   font-size: 1.2em;
 }
@@ -70,4 +77,16 @@
 
 .detail span {
   font-weight: bold;
+}
+
+.weather-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
+
+.weather-loading img {
+  width: 50px;
+  height: 50px;
 }

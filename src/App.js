@@ -1,70 +1,119 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import CitySearch from './components/CitySearch';
 import WeatherDisplay from './components/WeatherDisplay';
+import { categoryBackgrounds, getWeatherCategory } from './weatherConstants';
 import './App.css';
 
 const App = () => {
   const [weatherData, setWeatherData] = useState(null);
-  const [userData, setUserData] = useState(null);
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [loading, setLoading] = useState(false); 
 
-  useEffect(() => {
-    console.log('Environment Variable:', process.env.REACT_APP_WEATHER_API_KEY);
-    fetchUserData();
+  const fetchWeatherByCoordinates = useCallback(async (lat, lon) => {
+    try {
+      setLoading(true);
+      const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
+      const response = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`
+      );
+      const cityData = {
+        name: `${response.data.name}, ${response.data.sys.country}`,
+        id: response.data.id,
+      };
+      fetchWeather(cityData, false);
+    } catch (error) {
+      console.error('Error fetching the weather data:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const fetchWeather = async (city) => {
+  const fetchWeather = async (city, isUserInitiated = true) => {
     try {
+      setLoading(true);
       const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
       if (!apiKey) {
         throw new Error('API key is undefined');
       }
 
-      let url = '';
-      if (city.id) {
-        url = `https://api.openweathermap.org/data/2.5/weather?id=${city.id}&units=metric&appid=${apiKey}`;
-      } else {
-        const query = city.name.split(',').map(part => part.trim()).join(',');
-        url = `https://api.openweathermap.org/data/2.5/weather?q=${query}&units=metric&appid=${apiKey}`;
-      }
-
+      const query = city.name.split(',').map(part => part.trim()).join(',');
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${query}&units=metric&appid=${apiKey}`;
+      
       const response = await axios.get(url);
       setWeatherData(response.data);
-      saveUserData({ city: city.name, weatherData: response.data });
+
+      if (isUserInitiated) {
+        saveRecentSearch(city, response.data); 
+      }
     } catch (error) {
       console.error('Error fetching the weather data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const saveUserData = async (data) => {
-    try {
-      await axios.post('/api/userdata', data);
-    } catch (error) {
-      console.error('Error saving user data:', error);
+  const saveRecentSearch = (city, weather) => {
+    let searches = [...recentSearches];
+    if (!searches.some(search => search.name === city.name)) {
+      const searchItem = {
+        name: city.name,
+        temperature: weather.main.temp,
+        icon: weather.weather[0].icon,
+        condition: weather.weather[0].id
+      };
+      searches = [searchItem, ...searches].slice(0, 5); 
+      localStorage.setItem('recentSearches', JSON.stringify(searches));
+      setRecentSearches(searches);
     }
   };
 
-  const fetchUserData = async () => {
-    try {
-      const response = await axios.get('/api/userdata');
-      setUserData(response.data); 
-      console.log(response.data);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
+  const handleRecentSearchClick = (city) => {
+    fetchWeather(city);
   };
+
+  const getWeatherIconUrl = (icon) => `https://openweathermap.org/img/wn/${icon}.png`;
+
+  const getWeatherBackground = (conditionCode) => {
+    const category = getWeatherCategory(conditionCode);
+    return categoryBackgrounds[category];
+  };
+
+  useEffect(() => {
+    localStorage.clear();
+
+    const getUserLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const { latitude, longitude } = position.coords;
+          fetchWeatherByCoordinates(latitude, longitude);
+        }, (error) => {
+          console.error('Error getting location:', error);
+        });
+      } else {
+        console.error('Geolocation is not supported by this browser.');
+      }
+    };
+    
+    getUserLocation();
+  }, [fetchWeatherByCoordinates]);
 
   return (
     <div className="App">
       <h1>Weather App</h1>
       <CitySearch onSearch={fetchWeather} />
-      <WeatherDisplay weatherData={weatherData} />
-      {userData && (
-        <div className="previous-searches">
-          <h2>Previous Searches</h2>
+      {loading && <img className="loading-spinner" src="/images/loading.gif" alt="Loading..." />} 
+      {!loading && weatherData && <WeatherDisplay weatherData={weatherData} />}
+      {recentSearches.length > 0 && !loading && (
+        <div className="recent-searches">
+          <h2>Recent Searches</h2>
           <ul>
-            {userData.map((data, index) => (
-              <li key={index}>{data.city}: {data.weatherData.main.temp}°C</li>
+            {recentSearches.map((search, index) => (
+              <li key={index} style={{ backgroundImage: `url(${getWeatherBackground(search.condition)})` }} onClick={() => handleRecentSearchClick({ name: search.name })}>
+                <img src={getWeatherIconUrl(search.icon)} alt="Weather icon" />
+                <span>{search.name}</span>
+                <span className="previous-temp">{Math.round(search.temperature)}°C</span>
+              </li>
             ))}
           </ul>
         </div>

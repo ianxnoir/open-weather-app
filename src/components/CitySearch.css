@@ -20,27 +20,27 @@
   border-radius: 5px;
   font-size: 1em;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  margin-bottom: 0; /* Remove space below input */
-  box-sizing: border-box; /* Ensure padding and border are included in width */
+  margin-bottom: 0;
+  box-sizing: border-box; 
 }
 
 .city-suggestions {
-  width: 100%; /* Match the input width */
+  width: 100%;
   border: 1px solid #ccc;
-  border-top: none; /* Remove the top border to align with the input */
-  border-radius: 0 0 5px 5px; /* Rounded corners only at the bottom */
+  border-top: none;
+  border-radius: 0 0 5px 5px;
   background-color: white;
   max-height: 200px;
   overflow-y: auto;
   list-style: none;
   padding: 0;
-  margin: 0; /* Remove any margin */
-  position: absolute; /* Position absolutely relative to form */
-  top: 100%; /* Directly below the input field */
-  left: 0; /* Align with the input field */
-  z-index: 10; /* Ensure it appears above other elements */
+  margin: 0;
+  position: absolute;
+  top: 100%;
+  left: 0; 
+  z-index: 10;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box; /* Ensure padding and border are included in width */
+  box-sizing: border-box; 
 }
 
 .suggestion-item {
