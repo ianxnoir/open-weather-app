@@ -1,41 +1,46 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { debounce } from 'lodash';
 import cities from '../data/city.list.json';
 import './CitySearch.css';
 
 const CitySearch = ({ onSearch }) => {
   const [location, setLocation] = useState('');
-  const [selectedCityId, setSelectedCityId] = useState('');
   const [filteredCities, setFilteredCities] = useState([]);
 
-  const debouncedFilterCities = useCallback(debounce((value) => {
-    if (value.length > 0) {
-      const filtered = cities.filter(city =>
-        city.name.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 10); 
-      setFilteredCities(filtered);
-    } else {
-      setFilteredCities([]);
-    }
-  }, 300), []);
+  useEffect(() => {
+    const debouncedFilterCities = debounce((value) => {
+      if (value.length > 0) {
+        const filtered = cities.filter(city =>
+          city.name.toLowerCase().includes(value.toLowerCase())
+        ).slice(0, 10);
+        setFilteredCities(filtered);
+      } else {
+        setFilteredCities([]);
+      }
+    }, 300);
+
+    debouncedFilterCities(location);
+
+    return () => {
+      debouncedFilterCities.cancel();
+    };
+  }, [location]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
     setLocation(value);
-    debouncedFilterCities(value);
   };
 
   const handleCitySelect = (city) => {
     setLocation(`${city.name}, ${city.country}`);
-    setSelectedCityId(city.id);
     setFilteredCities([]);
+
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const city = cities.find(city => city.id === parseInt(selectedCityId));
-    const cityToSearch = city ? city : { name: location };
-    onSearch(cityToSearch);
+    const city = cities.find(city => city.name.toLowerCase() === location.toLowerCase());
+    onSearch(city ? city : { name: location });
   };
 
   return (

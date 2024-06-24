@@ -8,7 +8,49 @@ import './App.css';
 const App = () => {
   const [weatherData, setWeatherData] = useState(null);
   const [recentSearches, setRecentSearches] = useState([]);
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
+
+  const saveRecentSearch = useCallback((city, weather) => {
+    setRecentSearches((prevSearches) => {
+      let searches = [...prevSearches];
+      if (!searches.some(search => search.name === city.name)) {
+        const searchItem = {
+          name: city.name,
+          temperature: weather.main.temp,
+          icon: weather.weather[0].icon,
+          condition: weather.weather[0].id
+        };
+        searches = [searchItem, ...searches].slice(0, 5);
+        localStorage.setItem('recentSearches', JSON.stringify(searches));
+        return searches;
+      }
+      return prevSearches;
+    });
+  }, []);
+
+  const fetchWeather = useCallback(async (city, isUserInitiated = true) => {
+    try {
+      setLoading(true);
+      const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
+      if (!apiKey) {
+        throw new Error('API key is undefined');
+      }
+
+      const query = city.name.split(',').map(part => part.trim()).join(',');
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${query}&units=metric&appid=${apiKey}`;
+      
+      const response = await axios.get(url);
+      setWeatherData(response.data);
+
+      if (isUserInitiated) {
+        saveRecentSearch(city, response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching the weather data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [saveRecentSearch]);
 
   const fetchWeatherByCoordinates = useCallback(async (lat, lon) => {
     try {
@@ -27,46 +69,7 @@ const App = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  const fetchWeather = async (city, isUserInitiated = true) => {
-    try {
-      setLoading(true);
-      const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
-      if (!apiKey) {
-        throw new Error('API key is undefined');
-      }
-
-      const query = city.name.split(',').map(part => part.trim()).join(',');
-      const url = `https://api.openweathermap.org/data/2.5/weather?q=${query}&units=metric&appid=${apiKey}`;
-      
-      const response = await axios.get(url);
-      setWeatherData(response.data);
-
-      if (isUserInitiated) {
-        saveRecentSearch(city, response.data); 
-      }
-    } catch (error) {
-      console.error('Error fetching the weather data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const saveRecentSearch = (city, weather) => {
-    let searches = [...recentSearches];
-    if (!searches.some(search => search.name === city.name)) {
-      const searchItem = {
-        name: city.name,
-        temperature: weather.main.temp,
-        icon: weather.weather[0].icon,
-        condition: weather.weather[0].id
-      };
-      searches = [searchItem, ...searches].slice(0, 5); 
-      localStorage.setItem('recentSearches', JSON.stringify(searches));
-      setRecentSearches(searches);
-    }
-  };
+  }, [fetchWeather]);
 
   const handleRecentSearchClick = (city) => {
     fetchWeather(city);
@@ -102,7 +105,7 @@ const App = () => {
     <div className="App">
       <h1>Weather App</h1>
       <CitySearch onSearch={fetchWeather} />
-      {loading && <img className="loading-spinner" src="/images/loading.gif" alt="Loading..." />} 
+      {loading && <img className="loading-spinner" src="/images/loading.gif" alt="Loading..." />}
       {!loading && weatherData && <WeatherDisplay weatherData={weatherData} />}
       {recentSearches.length > 0 && !loading && (
         <div className="recent-searches">
